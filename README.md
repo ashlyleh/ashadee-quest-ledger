@@ -1,22 +1,35 @@
 # Ashadee Quest Ledger
 
-A private live dashboard for the `quest_rewards_ashadee` table in the **GC Quest Reward Tracker** Supabase project (Grundo's Data org).
+Quest reward stats for the `quest_rewards_ashadee` table in the **GC Quest Reward Tracker** Supabase project (Grundo's Data org). There are two versions of the dashboard.
 
 ## What is here
 
 | File | What it is |
 | --- | --- |
-| `dashboard.html` | The published dashboard, with the queries and five quest giver pictures embedded. |
-| `sql/q_summary.sql` | Totals, per-quest neopoints, daily counts, stat boosts. |
-| `sql/q_rewards.sql` | Relics, faeries, snowballs, coupons, codestones and top rewards, matched to `items`. |
-| `sql/q_requested.sql` | Most requested items with rarity. |
+| `index.html` | The public version, served by GitHub Pages. Shows item thumbnails. |
+| `dashboard.html` | The private version. Runs inside a Claude artifact through the Supabase connector. No item thumbnails. |
+| `sql/functions.sql` | The three aggregate-only functions `index.html` calls. Already applied to Supabase. |
+| `sql/q_*.sql` | The queries `dashboard.html` runs through the connector. |
 | `data/items_clean.csv` | The item list (6,376 rows) loaded into the `items` table. |
 
-## How it works
+## How the public version works
 
-The page runs inside a Claude artifact. It calls the Supabase connector's `execute_sql` tool as the viewer, so it only works while signed in to Claude with the Supabase connector allowed. It does not work as a normal website, and no database key is stored in these files.
+`index.html` calls three Supabase functions over the REST API using the project's publishable key:
 
-Item pictures are not shown because artifact pages cannot load images from other sites.
+- `dashboard_summary()`
+- `dashboard_rewards()`
+- `dashboard_requested()`
+
+Each function returns totals and rankings only. They never return raw rows or usernames. The tables themselves stay locked by row level security, so the publishable key in `index.html` cannot read them.
+
+Anyone with the page link can see the totals, top rewards, relic counts and most requested items.
+
+## Turn on GitHub Pages
+
+1. Make the repository public.
+2. Open Settings, then Pages.
+3. Under Source choose Deploy from a branch, then `main` and `/ (root)`, then Save.
+4. The site appears at `https://ashlyleh.github.io/ashadee-quest-ledger/` after a minute or two.
 
 ## Rebuild the `items` table
 
